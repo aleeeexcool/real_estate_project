@@ -33,8 +33,8 @@ contract RealEstate {
         bool verified; 
     }
 
-    // Struct details of govtInspector
-    struct govtInspector{
+    // Struct details of govInspector
+    struct govInspector{
         address id; 
         string name; 
         uint age; 
@@ -42,7 +42,7 @@ contract RealEstate {
     }
 
     mapping(address => uint) balance;
-    mapping(uint => govtInspector) landInspector;
+    mapping(uint => govInspector) landInspector;
     mapping(uint => LandInfo) public lands;
     mapping(address => seller) sellerMapp;
     mapping(address => buyer) buyerMapp;
@@ -64,15 +64,15 @@ contract RealEstate {
      * - This function can be called by deployer
      * @param _name - _name 
      * @param _age -  _age 
-     * @param _designaiton - _designaiton  
+     * @param _designation - _designation  
     
     */
-    constructor(string memory _name, uint _age, string memory _designaiton){
-        landInspector[0] = govtInspector({
+    constructor(string memory _name, uint _age, string memory _designation){
+        landInspector[0] = govInspector({
             id: msg.sender,
             name: _name,
             age: _age,
-            designation: _designaiton
+            designation: _designation
         });
     }
 
@@ -370,7 +370,7 @@ contract RealEstate {
     /*
      * @dev landInspectorr allows to get the inspector details.
     */
-    function landInspectorr() public view returns(govtInspector memory){
+    function landInspectorr() public view returns(govInspector memory){
         return landInspector[0];
     }
 
