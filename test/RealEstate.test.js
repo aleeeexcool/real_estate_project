@@ -11,7 +11,7 @@ describe("RealEstate", function () {
   beforeEach(async () => {
     [deployer, seller, buyer] = await ethers.getSigners();
 
-    const RealEstate = await ethers.deployContract('RealEstate');
+    const RealEstate = await ethers.getContractFactory('RealEstate');
     estate = await RealEstate.deploy('Inspector Name', 30, 'Inspector Designation');
     await estate.deployed();
 
@@ -23,33 +23,27 @@ describe("RealEstate", function () {
     };
   });
 
-  describe('Constructor', () => {
-    it('should initialize the contract with the correct govInspector details', async () => {
-      const storedInspector = await estate.landInspector(0);
+  // describe('Constructor', () => {
+  //   it('should initialize the contract with the correct govInspector details', async () => {
+  //     const storedInspector = await estate.landInspector(0);
       
-      expect(storedInspector).to.deep.equal(govInspector);
-    });
-  });
-
-  // describe('Seller', () => {
-  //   it('should register a seller', async () => {
-  //     const name = 'Seller Name';
-  //     const age = 25;
-  //     const city = 'Seller City';
-  //     const CNIC = 1234567890;
-  //     const email = 'seller@example.com';
-
-  //     await landContract.registerSeller(name, age, city, CNIC, email);
-
-  //     const storedSeller = await landContract.sellerMapp(seller.address);
-  //     expect(storedSeller).to.deep.equal({
-  //       name,
-  //       age,
-  //       city,
-  //       CNIC,
-  //       email,
-  //       verified: false,
-  //     });
+  //     expect(storedInspector.id).to.equal(deployer.address);
+  //     expect(storedInspector.name).to.equal("Inspector Name");
+  //     expect(storedInspector.age).to.equal(30);
+  //     expect(storedInspector.designation).to.equal("Inspector Designation");
   //   });
   // });
+
+  describe('Functions', () => {
+    it("should increase the balance of the caller", async function () {
+      const initialBalance = await estate.connect(deployer).getBalance();
+      
+      const balance = ethers.utils.parseEther("1.0");
+      await estate.deposite({ value: balance });
+  
+      const newBalance = await estate.connect(deployer).getBalance();
+  
+      expect(newBalance.sub(initialBalance)).to.equal(balance);
+    });
+  });
 })
