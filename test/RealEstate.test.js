@@ -9,7 +9,7 @@ describe("RealEstate", function () {
   let buyer;
 
   beforeEach(async () => {
-    [deployer, seller, buyer] = await ethers.getSigners();
+    [deployer, user1, user2] = await ethers.getSigners();
 
     const RealEstate = await ethers.getContractFactory('RealEstate');
     estate = await RealEstate.deploy('Inspector Name', 30, 'Inspector Designation');
@@ -38,7 +38,7 @@ describe("RealEstate", function () {
       CNIC: 87654321,
       email: "kate.best@gmail.com",
       verified: false
-    }
+    };
   });
 
   describe('Constructor', () => {
@@ -53,35 +53,58 @@ describe("RealEstate", function () {
   });
 
   describe('Registration and Update Functions', () => {
-    it("should increase the balance of the caller in deposite function", async function () {
-      const initialBalance = await estate.connect(deployer).getBalance();
+    it("should revert if the account is already registered as a Buyer", async () => {
+      await estate.connect(user1).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+
+      await expect(estate.connect(user1).registSeller(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email)).to.be.revertedWith("You are already registered as a Buyer");
+    });
+
+    it("should add infomation in sellers mapping and emit sellerRegistered event", async () => {
+      await expect(estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email))
+      .to.emit(estate, "sellerRegistered")
+      .withArgs(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+    });
+
+    it("should update infomation in sellers mapping and emit sellerDetailsUpdated event", async () => {
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+
+      const newName = "Max";
+      const newAge = 32;
+      const newCity = "London";
+      const newCNIC = 13245768;
+      const newEmail = "max.best@gmail.com";
       
-      const balance = ethers.utils.parseEther("1.0");
-      await estate.deposite({ value: balance });
-  
-      const newBalance = await estate.connect(deployer).getBalance();
-  
-      expect(newBalance.sub(initialBalance)).to.equal(balance);
+      await expect(estate.connect(user1).updateSeller(newName, newAge, newCity, newCNIC, newEmail))
+      .to.emit(estate, "sellerDetailsUpdated")
+      .withArgs(newName, newAge, newCity, newCNIC, newEmail);
     });
 
-    it("should revert if the account is already registered as a Buyer in registSeller function", async function () {
-      await estate.registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+    it("should revert if the account is already registered as a Seller", async () => {
+      await estate.connect(user2).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
 
-      await expect(estate.registSeller("Jonny", 21, "Paris", 12345678, "jonny.best@gmail.com")).to.be.revertedWith("You are already registered as a Buyer");
+      await expect(estate.connect(user2).registBuyer(seller.name, seller.age, seller.city, seller.CNIC, seller.email)).to.be.revertedWith("You are already registered as a Seller");
     });
 
-    it("should add infomation in sellers mapping and emit sellerRegistered event in registSeller function", async function () {
-      await estate.registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+    it("should add infomation in buyers mapping and emit buyerRegistered event", async () => {
+      await expect(estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email))
+      .to.emit(estate, "buyerRegistered")
+      .withArgs(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+    });
 
-      const newSeller = await estate.sellers(seller.address);
-      expect(newSeller.name).to.equal(seller.name);
-      expect(newSeller.age).to.equal(seller.age);
-      expect(newSeller.city).to.equal(seller.city);
-      expect(newSeller.CNIC).to.equal(seller.CNIC);
-      expect(newSeller.email).to.equal(seller.email);
+    it("should update infomation in buyers mapping and emit buyerDetailsUpdated event", async () => {
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
 
-      // await estate.connect(deployer).verifySeller(seller.address, seller.CNIC);
-      // expect(estate.sellers(seller.address).verified).to.be.equal(true);
+      const newName = "Tony";
+      const newAge = 45;
+      const newCity = "Dublin";
+      const newCNIC = 12563478;
+      const newEmail = "tony.best@gmail.com";
+      
+      await expect(estate.connect(user2).updateBuyer(newName, newAge, newCity, newCNIC, newEmail))
+      .to.emit(estate, "buyerDetailsUpdated")
+      .withArgs(newName, newAge, newCity, newCNIC, newEmail);
     });
   });
 
