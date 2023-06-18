@@ -77,7 +77,7 @@ contract RealEstate {
     }
 
     modifier onlyInspector(){
-        require(landInspector[0].id == msg.sender, "Only Land inspector has access to this function");
+        require(landInspector[0].id == msg.sender, "Only Land inspector has access!");
         _;
     }
 
