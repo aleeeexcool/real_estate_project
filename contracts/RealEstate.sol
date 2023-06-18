@@ -42,10 +42,10 @@ contract RealEstate {
     }
 
     mapping(address => uint) balance;
-    mapping(uint => govInspector) landInspector;
+    mapping(uint => govInspector) public landInspector;
     mapping(uint => LandInfo) public lands;
-    mapping(address => seller) sellers;
-    mapping(address => buyer) buyers;
+    mapping(address => seller) public sellers;
+    mapping(address => buyer) public buyers;
 
     event sellerRegistered(string name, uint _age, string city, uint _CNIC, string email); 
     event buyerRegistered(string name, uint _age, string city, uint _CNIC, string email);  
@@ -111,7 +111,7 @@ contract RealEstate {
             verified: false
         });
 
-        emit sellerRegistered(  _name,  _age,   _city,  _CNIC,   _email);
+        emit sellerRegistered(_name, _age, _city, _CNIC, _email);
     }
 
     /*
@@ -127,7 +127,8 @@ contract RealEstate {
      * Emits a {sellerDetailsUpdated} event.
     */
     function updateSeller(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        sellers[msg.sender] = seller ({
+        require(sellers[msg.sender].verified == true, "Seller is in pending status");
+        sellers[msg.sender] = seller({
             name: _name,
             age: _age,
             city: _city,
@@ -136,7 +137,7 @@ contract RealEstate {
             verified: false
         });   
 
-        emit sellerDetailsUpdated( _name, _age,  _city, _CNIC,  _email); 
+        emit sellerDetailsUpdated(_name, _age, _city, _CNIC, _email); 
     }
 
     /*
@@ -162,7 +163,7 @@ contract RealEstate {
             verified: false
         });
 
-        emit buyerRegistered( _name,  _age, _city, _CNIC, _email);
+        emit buyerRegistered(_name, _age, _city, _CNIC, _email);
     }
 
 
@@ -179,8 +180,8 @@ contract RealEstate {
      * Emits a {buyerDetailsUpdated} event.
     */
     function updateBuyer(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        require(buyers[msg.sender].verified == true, "Seller is in pending status");
-        buyers[msg.sender] = buyer ({
+        require(buyers[msg.sender].verified == true, "Buyer is in pending status");
+        buyers[msg.sender] = buyer({
             name: _name,
             age: _age,
             city: _city,
@@ -189,7 +190,7 @@ contract RealEstate {
             verified: false
         });
 
-        emit buyerDetailsUpdated(  _name, _age,  _city, _CNIC,  _email);
+        emit buyerDetailsUpdated(_name, _age, _city, _CNIC, _email);
     }
 
     /**
@@ -217,7 +218,7 @@ contract RealEstate {
             verified: false
         });
 
-        emit landUploaded( _landId,  _area,  _state,  _city, _totalPrice);
+        emit landUploaded(_landId, _area, _state, _city, _totalPrice);
     }
 
 
@@ -256,7 +257,6 @@ contract RealEstate {
         require(lands[_landId].totalPrice == amount, "Amount is not equal to the Land Price");
         require(lands[_landId].propertyOwner == sellerAcc,"Wrong Account");
 
-        
         balance[msg.sender] -= amount;
         balance[sellerAcc] += amount;
 
@@ -293,13 +293,13 @@ contract RealEstate {
      *
      * Emits a {sellerIsVerified} event.
     */
-    function VerifySeller(address addr, uint _CNIC) public onlyInspector {
+    function verifySeller(address addr, uint _CNIC) public onlyInspector {
         require(sellers[addr].CNIC == _CNIC,"Wrong info");
         require(sellers[addr].verified == false,"Seller is already verified");
 
         sellers[addr].verified = true;
 
-        emit sellerIsVerified( addr, _CNIC);
+        emit sellerIsVerified(addr, _CNIC);
     }
 
     /*
@@ -311,7 +311,7 @@ contract RealEstate {
      *
      * Emits a {buyerIsVerified} event.
     */
-    function verifyBuyer(address addr, uint _CNIC) public onlyInspector{
+    function verifyBuyer(address addr, uint _CNIC) public onlyInspector {
         require(buyers[addr].CNIC == _CNIC, "Wrong Info");
         require(buyers[addr].verified == false, "Buyer is already verified");
 
