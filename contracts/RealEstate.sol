@@ -320,119 +320,47 @@ contract RealEstate {
         emit buyerIsVerified(addr, _CNIC);
     }
 
-
-    /*
-     * @dev landOwner allows to know the land owner.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param _landId - _landId 
-     *
-    */
     function landOwner(uint _landId) public view returns(address){
         return lands[_landId].propertyOwner;
     }
 
-
-    /*
-     * @dev landisVerified allows to know the land is verified or not.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param _landId - _landId 
-     *
-    */
     function landisVerified(uint _landId) public view returns(bool){
         return lands[_landId].verified;
     }
 
-
-    /*
-     * @dev checkSeller allows to check the seller verification.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param addr - addr 
-     *
-    */
     function checkSeller(address addr) public view returns(bool){
         return sellers[addr].verified;
     }
 
-    /*
-     * @dev checkBuyer allows to check the buyer verification.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param addr - addr 
-     *
-    */
     function checkBuyer(address addr) public view returns(bool){
         return buyers[addr].verified;
     }
 
-    /*
-     * @dev landInspectorr allows to get the inspector details.
-    */
     function landInspectorr() public view returns(govInspector memory){
         return landInspector[0];
     }
 
-    /*
-     * @dev getLandCity allows to check the buyer verification.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param _landId - _landId 
-     *
-    */
     function getLandCity(uint _landId) public view returns(string memory){
         return lands[_landId].city;
     }
 
-    /*
-     * @dev getLandPrice allows to get the price of land.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param _landId - _landId 
-     *
-    */
     function getLandPrice(uint _landId) public view returns(uint){
         return lands[_landId].totalPrice;
     }
 
-    /*
-     * @dev getArea allows to get the Area of land.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param _landId - _landId 
-     *
-    */
     function getArea(uint _landId) public view returns(string memory){
     
         return lands[_landId].area;
     }
 
-    /*
-     * @dev getArea allows to get the balance.
-     *
-    */
     function getBalance() public view returns(uint){
         return balance[msg.sender];
     }
 
-     /*
-     * @dev getArea allows to get the total balance of contract.
-     * Requirement:
-     * - This function can be called by onlyInspector
-    */
     function getTotalBalance() public view onlyInspector returns(uint){
         return address(this).balance;
     }
     
-
-    /*
-     * @dev isBuyer allows to know wheather user is buyer or not.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param addr - addr 
-     *
-    */
     function isBuyer(address addr) public view returns(bool){
         if(buyers[addr].CNIC == 0){
             return false;
@@ -441,13 +369,6 @@ contract RealEstate {
         } 
     }
 
-    /*
-     * @dev isSeller allows to know wheather user is seller or not.
-     * Requirement:
-     * - This function can be called by anyone
-     * @param addr - addr 
-     *
-    */
     function isSeller(address addr) public view returns(bool){
         if(sellers[addr].CNIC == 0){
             return false;
