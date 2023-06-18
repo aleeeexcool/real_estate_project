@@ -44,8 +44,8 @@ contract RealEstate {
     mapping(address => uint) balance;
     mapping(uint => govInspector) landInspector;
     mapping(uint => LandInfo) public lands;
-    mapping(address => seller) sellerMapp;
-    mapping(address => buyer) buyerMapp;
+    mapping(address => seller) sellers;
+    mapping(address => buyer) buyers;
 
     event sellerRegistered(string name, uint _age, string city, uint _CNIC, string email); 
     event buyerRegistered(string name, uint _age, string city, uint _CNIC, string email);  
@@ -101,8 +101,8 @@ contract RealEstate {
      * Emits a {sellerRegistered(  _name,  _age,   _city,  _CNIC,   _email)} event.
     */
     function registSeller(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        require(buyerMapp[msg.sender].CNIC == 0, "You are already registered as a Buyer");
-        sellerMapp[msg.sender] = seller({
+        require(buyers[msg.sender].CNIC == 0, "You are already registered as a Buyer");
+        sellers[msg.sender] = seller({
             name: _name,
             age: _age,
             city: _city,
@@ -127,7 +127,7 @@ contract RealEstate {
      * Emits a {sellerDetailsUpdated} event.
     */
     function updateSeller(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        sellerMapp[msg.sender] = seller ({
+        sellers[msg.sender] = seller ({
             name: _name,
             age: _age,
             city: _city,
@@ -152,8 +152,8 @@ contract RealEstate {
      * Emits a {buyerRegistered} event.
     */
     function registBuyer(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        require(sellerMapp[msg.sender].CNIC == 0, "You are already registered as a Seller");
-        buyerMapp[msg.sender] = buyer({
+        require(sellers[msg.sender].CNIC == 0, "You are already registered as a Seller");
+        buyers[msg.sender] = buyer({
             name: _name,
             age: _age,
             city: _city,
@@ -179,8 +179,8 @@ contract RealEstate {
      * Emits a {buyerDetailsUpdated} event.
     */
     function updateBuyer(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
-        require(buyerMapp[msg.sender].verified == true, "Seller is in pending status");
-        buyerMapp[msg.sender] = buyer ({
+        require(buyers[msg.sender].verified == true, "Seller is in pending status");
+        buyers[msg.sender] = buyer ({
             name: _name,
             age: _age,
             city: _city,
@@ -205,7 +205,7 @@ contract RealEstate {
      * Emits a {landUploaded} event.
     */
     function uploadLand(uint _landId, string memory _area, string memory _state, string memory _city, uint _totalPrice) public {
-        require(sellerMapp[msg.sender].verified == true,"You are not verified SELLER");
+        require(sellers[msg.sender].verified == true,"You are not verified SELLER");
 
         lands[_landId] = LandInfo({
             landId: _landId,
@@ -251,7 +251,7 @@ contract RealEstate {
     */
     function buyLand(uint _landId, uint amount, address payable sellerAcc) public {
         require(lands[_landId].verified == true, "Land is not Verified");
-        require(buyerMapp[msg.sender].verified == true, "You are not verified yet!");
+        require(buyers[msg.sender].verified == true, "You are not verified yet!");
         require(balance[msg.sender] >= amount, "Insufficient Balance");
         require(lands[_landId].totalPrice == amount, "Amount is not equal to the Land Price");
         require(lands[_landId].propertyOwner == sellerAcc,"Wrong Account");
@@ -294,10 +294,10 @@ contract RealEstate {
      * Emits a {sellerIsVerified} event.
     */
     function VerifySeller(address addr, uint _CNIC) public onlyInspector {
-        require(sellerMapp[addr].CNIC == _CNIC,"Wrong info");
-        require(sellerMapp[addr].verified == false,"Seller is already verified");
+        require(sellers[addr].CNIC == _CNIC,"Wrong info");
+        require(sellers[addr].verified == false,"Seller is already verified");
 
-        sellerMapp[addr].verified = true;
+        sellers[addr].verified = true;
 
         emit sellerIsVerified( addr, _CNIC);
     }
@@ -312,10 +312,10 @@ contract RealEstate {
      * Emits a {buyerIsVerified} event.
     */
     function verifyBuyer(address addr, uint _CNIC) public onlyInspector{
-        require(buyerMapp[addr].CNIC == _CNIC, "Wrong Info");
-        require(buyerMapp[addr].verified == false, "Buyer is already verified");
+        require(buyers[addr].CNIC == _CNIC, "Wrong Info");
+        require(buyers[addr].verified == false, "Buyer is already verified");
 
-        buyerMapp[addr].verified = true;
+        buyers[addr].verified = true;
 
         emit buyerIsVerified(addr, _CNIC);
     }
@@ -353,7 +353,7 @@ contract RealEstate {
      *
     */
     function checkSeller(address addr) public view returns(bool){
-        return sellerMapp[addr].verified;
+        return sellers[addr].verified;
     }
 
     /*
@@ -364,7 +364,7 @@ contract RealEstate {
      *
     */
     function checkBuyer(address addr) public view returns(bool){
-        return buyerMapp[addr].verified;
+        return buyers[addr].verified;
     }
 
     /*
@@ -434,7 +434,7 @@ contract RealEstate {
      *
     */
     function isBuyer(address addr) public view returns(bool){
-        if(buyerMapp[addr].CNIC == 0){
+        if(buyers[addr].CNIC == 0){
             return false;
         }else{
             return true;
@@ -449,7 +449,7 @@ contract RealEstate {
      *
     */
     function isSeller(address addr) public view returns(bool){
-        if(sellerMapp[addr].CNIC == 0){
+        if(sellers[addr].CNIC == 0){
             return false;
         }else{
             return true;

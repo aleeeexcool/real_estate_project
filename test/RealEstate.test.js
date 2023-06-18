@@ -45,5 +45,16 @@ describe("RealEstate", function () {
   
       expect(newBalance.sub(initialBalance)).to.equal(balance);
     });
+
+    it("should increase the balance of the caller", async function () {
+      const initialBalance = await estate.connect(deployer).getBalance();
+      
+      const balance = ethers.utils.parseEther("1.0");
+      await estate.deposite({ value: balance });
+  
+      const newBalance = await estate.connect(deployer).getBalance();
+  
+      expect(newBalance.sub(initialBalance)).to.equal(balance);
+    });
   });
 })
