@@ -66,7 +66,7 @@ describe("RealEstate", function () {
     it("should revert if the account is already registered as a Buyer", async () => {
       await estate.connect(user1).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
 
-      await expect(estate.connect(user1).registSeller(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email))
+      expect(estate.connect(user1).registSeller(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email))
       .to.be.revertedWith("You are already registered as a Buyer");
     });
 
@@ -74,6 +74,36 @@ describe("RealEstate", function () {
       await expect(estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email))
       .to.emit(estate, "sellerRegistered")
       .withArgs(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+    });
+
+    it("should revert if the seller is already verified", async () => {
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+
+      expect(estate.connect(deployer).verifySeller(user1.address, seller.CNIC)).to.be.revertedWith("Seller is already verified")
+    });
+
+    it("should update verified status of seller", async () => {
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      const newStatus = await estate.sellers(user1.address);
+
+      expect(newStatus.verified).to.be.equal(true);
+    });
+
+    it("should revert if the buyer is already verified", async () => {
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
+      
+      expect(estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC));
+    });
+
+    it("should update verified status of buyer", async () => {
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
+      const newStatus = await estate.buyers(user2.address);
+
+      expect(newStatus.verified).to.be.equal(true);
     });
 
     it("should update info in sellers mapping and emit sellerDetailsUpdated event", async () => {
@@ -86,7 +116,7 @@ describe("RealEstate", function () {
       const newCNIC = 13245768;
       const newEmail = "max.best@gmail.com";
       
-      await expect(estate.connect(user1).updateSeller(newName, newAge, newCity, newCNIC, newEmail))
+      expect(estate.connect(user1).updateSeller(newName, newAge, newCity, newCNIC, newEmail))
       .to.emit(estate, "sellerDetailsUpdated")
       .withArgs(newName, newAge, newCity, newCNIC, newEmail);
     });
@@ -94,7 +124,7 @@ describe("RealEstate", function () {
     it("should revert if the account is already registered as a Seller", async () => {
       await estate.connect(user2).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
 
-      await expect(estate.connect(user2).registBuyer(seller.name, seller.age, seller.city, seller.CNIC, seller.email))
+      expect(estate.connect(user2).registBuyer(seller.name, seller.age, seller.city, seller.CNIC, seller.email))
       .to.be.revertedWith("You are already registered as a Seller");
     });
 
@@ -114,7 +144,7 @@ describe("RealEstate", function () {
       const newCNIC = 12563478;
       const newEmail = "tony.best@gmail.com";
       
-      await expect(estate.connect(user2).updateBuyer(newName, newAge, newCity, newCNIC, newEmail))
+      expect(estate.connect(user2).updateBuyer(newName, newAge, newCity, newCNIC, newEmail))
       .to.emit(estate, "buyerDetailsUpdated")
       .withArgs(newName, newAge, newCity, newCNIC, newEmail);
     });
@@ -124,7 +154,7 @@ describe("RealEstate", function () {
     it("should revert if the seller is not verified", async () => {
       await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
       
-      await expect(estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice))
+      expect(estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice))
       .to.be.revertedWith("You are not verified SELLER");
     });
     
@@ -132,7 +162,7 @@ describe("RealEstate", function () {
       await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
       await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
 
-      await expect(estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice))
+      expect(estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice))
       .to.emit(estate, "landUploaded")
       .withArgs(land.id, land.area, land.state, land.city, land.totalPrice);
     });
@@ -141,29 +171,24 @@ describe("RealEstate", function () {
       await expect(estate.connect(user2).verifyLand(0)).to.be.rejectedWith("Only Land inspector has access!");
     });
 
-    // it("should revert if the land is already verified", async () => {
+    it("should revert if the land is already verified", async () => {
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      await estate.connect(deployer).verifyLand(land.id);
+      
+      expect(estate.connect(deployer).verifyLand(land.id)).to.be.revertedWith("Land is already verified");
+    });
 
-    // });
-
-    // it("should verify the land and emit landIsVerified event", async () => {
-
-    // });
-
-    // it("should revert if the seller is already verified", async () => {
-
-    // });
-
-    // it("should update verified status and emit sellerIsVerified event", async () => {
-
-    // });
-
-    // it("should revert if the buyer is already verified", async () => {
-
-    // });
-
-    // it("should update verified status and emit buyerIsVerified event", async () => {
-
-    // });
+    it("should verify the land and emit landIsVerified event", async () => {
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      
+      expect(estate.connect(deployer).verifyLand(land.id))
+      .to.emit(estate, "landIsVerified")
+      .withArgs(land.id);
+    });
   });
 
   describe('Deposite, Buy and Withdraw functions', () => {
@@ -178,6 +203,8 @@ describe("RealEstate", function () {
       expect(newBalance.sub(initialBalance)).to.equal(balance);
     });
 
+    it("should revert if buyer has enough amount to buy land", async () => {
 
+    });
   });
 })

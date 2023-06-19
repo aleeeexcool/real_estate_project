@@ -233,7 +233,7 @@ contract RealEstate {
     */
     function verifyLand(uint _landId) public onlyInspector {
         require(lands[_landId].landId == _landId, "Wrong Info");
-        require(lands[_landId].verified == false, "Land is already verified!");
+        require(lands[_landId].verified == false, "Land is already verified");
 
         lands[_landId].verified = true;
 
