@@ -9,7 +9,7 @@ describe("RealEstate", function () {
   let buyer;
 
   beforeEach(async () => {
-    [deployer, user1, user2] = await ethers.getSigners();
+    [deployer, user1, user2, user3] = await ethers.getSigners();
 
     const RealEstate = await ethers.getContractFactory('RealEstate');
     estate = await RealEstate.deploy('Inspector Name', 30, 'Inspector Designation');
@@ -203,7 +203,23 @@ describe("RealEstate", function () {
       expect(newBalance.sub(initialBalance)).to.equal(balance);
     });
 
-    it("should revert if buyer has enough amount to buy land", async () => {
+    it("should revert if the buyer has not enough amount in the balance", async () => {
+
+    });
+
+    it("should revert if the buyer has less amount than totalPrice of land", async () => {
+
+    });
+
+    it("should revert if the buyer want to buy land with another owner", async () => {
+
+    });
+
+    it("should allow to buy land and emit landBought event", async () => {
+
+    });
+
+    it("should change the propertyOwner of the land after buyer will buy this land", async () => {
 
     });
   });
