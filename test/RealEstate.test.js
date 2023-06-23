@@ -45,8 +45,8 @@ describe("RealEstate", function () {
       area: "Asia",
       state: "UAE",
       city: "Dubai",
-      totalPrice: 100,
-      propertyOwner: null,
+      totalPrice: 1,
+      propertyOwner: user1.address,
       verified: false
     }
   });
@@ -204,23 +204,53 @@ describe("RealEstate", function () {
     });
 
     it("should revert if the buyer has not enough amount in the balance", async () => {
-
+      const amount = 100;
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      await estate.connect(deployer).verifyLand(land.id);
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
+      
+      await expect(estate.connect(user2).buyLand(land.id, amount, user1.address)).to.be.rejectedWith("Insufficient Balance");
     });
 
     it("should revert if the buyer has less amount than totalPrice of land", async () => {
+      const amount = 75;
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      await estate.connect(deployer).verifyLand(land.id);
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
 
+      expect(estate.connect(user2).buyLand(land.id, amount, user1.address)).to.be.revertedWith("Amount is not equal to the Land Price");
     });
 
     it("should revert if the buyer want to buy land with another owner", async () => {
+      const amount = 75;
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      await estate.connect(deployer).verifyLand(land.id);
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
 
+      expect(estate.connect(user2).buyLand(1, amount, user3.address)).to.be.revertedWith("Wrong Account");
     });
 
     it("should allow to buy land and emit landBought event", async () => {
+      const amount = 100;
+      await estate.connect(user1).registSeller(seller.name, seller.age, seller.city, seller.CNIC, seller.email);
+      await estate.connect(deployer).verifySeller(user1.address, seller.CNIC);
+      await estate.connect(user1).uploadLand(land.id, land.area, land.state, land.city, land.totalPrice);
+      await estate.connect(deployer).verifyLand(land.id);
+      await estate.connect(user2).registBuyer(buyer.name, buyer.age, buyer.city, buyer.CNIC, buyer.email);
+      await estate.connect(deployer).verifyBuyer(user2.address, buyer.CNIC);
 
-    });
-
-    it("should change the propertyOwner of the land after buyer will buy this land", async () => {
-
+      expect(estate.connect(user2).buyLand(land.id, amount, user1.address))
+      .to.emit(estate, "landBought")
+      .withArgs(land.id, amount, user1.address);
     });
   });
 })
