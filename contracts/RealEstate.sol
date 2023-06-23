@@ -87,6 +87,14 @@ contract RealEstate {
     function deposite() public payable {
         balance[msg.sender] += msg.value;
     }
+    
+    /*
+     * @dev withdraw allows to withdraw ethers.
+    */
+    function withdraw() public onlyInspector {
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "Failed! Ethers not sent!");
+    }
 
     /*
      * @dev registerSeller allows to register sellers.
