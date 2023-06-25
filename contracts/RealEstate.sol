@@ -68,7 +68,7 @@ contract RealEstate {
      * @param _designation - _designation  
     
     */
-    constructor(string memory _name, uint _age, string memory _designation){
+    constructor(string memory _name, uint _age, string memory _designation) {
         landInspector = govInspector({
             id: msg.sender,
             name: _name,
@@ -77,7 +77,7 @@ contract RealEstate {
         });
     }
 
-    modifier onlyInspector(){
+    modifier onlyInspector() {
         require(landInspector.id == msg.sender, "Only Land inspector has access!");
         _;
     }
@@ -332,48 +332,48 @@ contract RealEstate {
         emit buyerIsVerified(_address, _CNIC);
     }
 
-    function landOwner(uint _landId) public view returns(address){
+    function landOwner(uint _landId) public view returns(address) {
         return lands[_landId].propertyOwner;
     }
 
-    function landisVerified(uint _landId) public view returns(bool){
+    function landisVerified(uint _landId) public view returns(bool) {
         return lands[_landId].verified;
     }
 
-    function checkSeller(address _address) public view returns(bool){
+    function checkSeller(address _address) public view returns(bool) {
         return sellers[_address].verified;
     }
 
-    function checkBuyer(address _address) public view returns(bool){
+    function checkBuyer(address _address) public view returns(bool) {
         return buyers[_address].verified;
     }
 
-    function _landInspector() public view returns(govInspector memory){
+    function _landInspector() public view returns(govInspector memory) {
         return landInspector;
     }
 
-    function getLandCity(uint _landId) public view returns(string memory){
+    function getLandCity(uint _landId) public view returns(string memory) {
         return lands[_landId].city;
     }
 
-    function getLandPrice(uint _landId) public view returns(uint){
+    function getLandPrice(uint _landId) public view returns(uint) {
         return lands[_landId].totalPrice;
     }
 
-    function getArea(uint _landId) public view returns(string memory){
+    function getArea(uint _landId) public view returns(string memory) {
     
         return lands[_landId].area;
     }
 
-    function getBalance() public view returns(uint){
+    function getBalance() public view returns(uint) {
         return balance[msg.sender];
     }
 
-    function getTotalBalance() public view onlyInspector returns(uint){
+    function getTotalBalance() public view onlyInspector returns(uint) {
         return address(this).balance;
     }
     
-    function isBuyer(address _address) public view returns(bool){
+    function isBuyer(address _address) public view returns(bool) {
         if(buyers[_address].CNIC == 0){
             return false;
         }else{
@@ -381,7 +381,7 @@ contract RealEstate {
         } 
     }
 
-    function isSeller(address _address) public view returns(bool){
+    function isSeller(address _address) public view returns(bool) {
         if(sellers[_address].CNIC == 0){
             return false;
         }else{
