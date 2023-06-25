@@ -1,15 +1,9 @@
-const hre = require('hardhat');
-const { escape } = require('querystring');
+const ethers = require ('hardhat');
 
 async function main() {
-  let estate;
-  const name = "Johny";
-  const age = 25;
-  const designation = "First inspector";
-
-  const RealEstate = await ethers.deployContract("RealEstate")
-  estate = RealEstate.deploy(name, age, designation)
-  await estate.deployed()
+  const RealEstate = await ethers.getContractFactory('RealEstate');
+  const estate = await RealEstate.deploy('Inspector Name', 30, 'Inspector Designation');
+  await estate.deployed();
 
   console.log("Contract deployed at ", estate.address)
 }
@@ -19,4 +13,4 @@ main()
   .catch((error) => {
     console.error(error)
     process.exit(1)
-  })
+})

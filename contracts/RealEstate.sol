@@ -41,18 +41,19 @@ contract RealEstate {
         string designation;
     }
 
-    mapping(address => uint) balance;
-    mapping(uint => govInspector) public landInspector;
-    mapping(uint => LandInfo) public lands;
-    mapping(address => seller) public sellers;
-    mapping(address => buyer) public buyers;
+    govInspector private landInspector;
+
+    mapping(address => uint) private balance;
+    mapping(uint => LandInfo) private lands;
+    mapping(address => seller) private sellers;
+    mapping(address => buyer) private buyers;
 
     event sellerRegistered(string name, uint _age, string city, uint _CNIC, string email); 
     event buyerRegistered(string name, uint _age, string city, uint _CNIC, string email);  
     event sellerDetailsUpdated(string  _name, uint _age, string  _city, uint _CNIC, string  _email); 
     event buyerDetailsUpdated(string  _name, uint _age, string  _city, uint _CNIC, string  _email);  
-    event sellerIsVerified(address addr, uint _CNIC); 
-    event buyerIsVerified(address addr, uint _CNIC); 
+    event sellerIsVerified(address _address, uint _CNIC); 
+    event buyerIsVerified(address _address, uint _CNIC); 
     event landUploaded(uint _landId, string  _area, string  _state, string  _city, uint _totalPrice); 
     event landIsVerified(uint _landId); 
     event landBought(uint _landId, uint amount, address sellerAcc); 
@@ -68,7 +69,7 @@ contract RealEstate {
     
     */
     constructor(string memory _name, uint _age, string memory _designation){
-        landInspector[0] = govInspector({
+        landInspector = govInspector({
             id: msg.sender,
             name: _name,
             age: _age,
@@ -77,7 +78,7 @@ contract RealEstate {
     }
 
     modifier onlyInspector(){
-        require(landInspector[0].id == msg.sender, "Only Land inspector has access!");
+        require(landInspector.id == msg.sender, "Only Land inspector has access!");
         _;
     }
 
@@ -91,8 +92,11 @@ contract RealEstate {
     /*
      * @dev withdraw allows to withdraw ethers.
     */
-    function withdraw() public onlyInspector {
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+    function withdraw() external {
+        require(balance[msg.sender] >= 0, "Insufficient Balance");
+        uint value = balance[msg.sender];
+        balance[msg.sender] = 0;
+        (bool success, ) = msg.sender.call{value: value}("");
         require(success, "Failed! Ethers not sent!");
     }
 
@@ -296,36 +300,36 @@ contract RealEstate {
      * @dev VerifySeller allows to verify sellers.
      * Requirement:
      * - This function can be called by onlyInspector
-     * @param addr - addr 
+     * @param _address - _address 
      * @param _CNIC -  _CNIC 
      *
      * Emits a {sellerIsVerified} event.
     */
-    function verifySeller(address addr, uint _CNIC) public onlyInspector {
-        require(sellers[addr].CNIC == _CNIC,"Wrong info");
-        require(sellers[addr].verified == false,"Seller is already verified");
+    function verifySeller(address _address, uint _CNIC) public onlyInspector {
+        require(sellers[_address].CNIC == _CNIC,"Wrong info");
+        require(sellers[_address].verified == false,"Seller is already verified");
 
-        sellers[addr].verified = true;
+        sellers[_address].verified = true;
 
-        emit sellerIsVerified(addr, _CNIC);
+        emit sellerIsVerified(_address, _CNIC);
     }
 
     /*
      * @dev verifyBuyer allows to verify buyers.
      * Requirement:
      * - This function can be called by onlyInspector
-     * @param addr - addr 
+     * @param _address - _address 
      * @param _CNIC -  _CNIC 
      *
      * Emits a {buyerIsVerified} event.
     */
-    function verifyBuyer(address addr, uint _CNIC) public onlyInspector {
-        require(buyers[addr].CNIC == _CNIC, "Wrong Info");
-        require(buyers[addr].verified == false, "Buyer is already verified");
+    function verifyBuyer(address _address, uint _CNIC) public onlyInspector {
+        require(buyers[_address].CNIC == _CNIC, "Wrong Info");
+        require(buyers[_address].verified == false, "Buyer is already verified");
 
-        buyers[addr].verified = true;
+        buyers[_address].verified = true;
 
-        emit buyerIsVerified(addr, _CNIC);
+        emit buyerIsVerified(_address, _CNIC);
     }
 
     function landOwner(uint _landId) public view returns(address){
@@ -336,16 +340,16 @@ contract RealEstate {
         return lands[_landId].verified;
     }
 
-    function checkSeller(address addr) public view returns(bool){
-        return sellers[addr].verified;
+    function checkSeller(address _address) public view returns(bool){
+        return sellers[_address].verified;
     }
 
-    function checkBuyer(address addr) public view returns(bool){
-        return buyers[addr].verified;
+    function checkBuyer(address _address) public view returns(bool){
+        return buyers[_address].verified;
     }
 
-    function landInspectorr() public view returns(govInspector memory){
-        return landInspector[0];
+    function _landInspector() public view returns(govInspector memory){
+        return landInspector;
     }
 
     function getLandCity(uint _landId) public view returns(string memory){
@@ -369,16 +373,16 @@ contract RealEstate {
         return address(this).balance;
     }
     
-    function isBuyer(address addr) public view returns(bool){
-        if(buyers[addr].CNIC == 0){
+    function isBuyer(address _address) public view returns(bool){
+        if(buyers[_address].CNIC == 0){
             return false;
         }else{
             return true;
         } 
     }
 
-    function isSeller(address addr) public view returns(bool){
-        if(sellers[addr].CNIC == 0){
+    function isSeller(address _address) public view returns(bool){
+        if(sellers[_address].CNIC == 0){
             return false;
         }else{
             return true;

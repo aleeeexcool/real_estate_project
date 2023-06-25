@@ -53,7 +53,7 @@ describe("RealEstate", function () {
 
   describe('Constructor', () => {
     it('should initialize the contract with the correct govInspector details', async () => {
-      const storedInspector = await estate.landInspector(0);
+      const storedInspector = await estate.landInspector();
       
       expect(storedInspector.id).to.equal(deployer.address);
       expect(storedInspector.name).to.equal("Inspector Name");
