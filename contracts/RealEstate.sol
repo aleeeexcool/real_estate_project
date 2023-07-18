@@ -94,6 +94,7 @@ contract RealEstate {
     */
     function withdraw() external {
         require(balance[msg.sender] >= 0, "Insufficient Balance");
+
         uint value = balance[msg.sender];
         balance[msg.sender] = 0;
         (bool success, ) = msg.sender.call{value: value}("");
@@ -114,6 +115,7 @@ contract RealEstate {
     */
     function registSeller(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
         require(buyers[msg.sender].CNIC == 0, "You are already registered as a Buyer");
+
         sellers[msg.sender] = seller({
             name: _name,
             age: _age,
@@ -140,6 +142,7 @@ contract RealEstate {
     */
     function updateSeller(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
         require(sellers[msg.sender].verified == true, "Seller is in pending status");
+
         sellers[msg.sender] = seller({
             name: _name,
             age: _age,
@@ -166,6 +169,7 @@ contract RealEstate {
     */
     function registBuyer(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
         require(sellers[msg.sender].CNIC == 0, "You are already registered as a Seller");
+
         buyers[msg.sender] = buyer({
             name: _name,
             age: _age,
@@ -193,6 +197,7 @@ contract RealEstate {
     */
     function updateBuyer(string memory _name, uint _age, string memory _city, uint _CNIC, string memory _email) public {
         require(buyers[msg.sender].verified == true, "Buyer is in pending status");
+
         buyers[msg.sender] = buyer({
             name: _name,
             age: _age,
